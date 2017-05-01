@@ -1,0 +1,34 @@
+grafana:
+  environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+    - GF_USERS_ALLOW_SIGN_UP=false
+    - VIRTUAL_HOST=maritime.aluxian.com
+  image: 'grafana/grafana:latest'
+  links:
+    - influxdb
+    - prometheus
+  ports:
+    - '3000:3000'
+  restart: on-failure
+  volumes:
+    - '/mnt/data/monit/grafana/data:/var/lib/grafana'
+influxdb:
+  image: 'influxdb:latest'
+  ports:
+    - '8083:8083'
+    - '8086:8086'
+  restart: on-failure
+  volumes:
+    - '/mnt/data/monit/influxdb/data:/var/lib/influxdb'
+    - '/root/influx:/var/lib/influxshared'
+prometheus:
+  command: '-config.file=/etc/prometheus/prometheus.yml -storage.local.path=/prometheus -web.console.libraries=/etc/prometheus/console_libraries -web.console.templates=/etc/prometheus/consoles -web.external-url=http://prometheus.maritime.aluxian.com'
+  environment:
+    - VIRTUAL_HOST=prometheus.maritime.aluxian.com
+  image: 'prom/prometheus:latest'
+  ports:
+    - '9090:9090'
+  restart: on-failure
+  volumes:
+    - '/mnt/data/monit/prometheus/config:/etc/prometheus'
+    - '/mnt/data/monit/prometheus/data:/prometheus'
